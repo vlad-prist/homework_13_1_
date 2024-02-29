@@ -19,7 +19,7 @@ class Category:
         self.goods.append(good)
 
     def __repr__(self):
-        return f'Наименование: {self.name}, Описание: {self.description}, Список позиций: {self.goods}'
+        return f'{self.name}, {self.description}, {self.goods}'
 
 
 
@@ -40,7 +40,7 @@ class Product:
         Product.count_product += 1 #при создании экземлпяра, счетчик увеличивается на 1
 
     def __repr__(self):
-        return f'Наименование: {self.name}, Описание: {self.description}, Список позиций: {self.price}/ Остаток: {self.quantity}'
+        return f'{self.name}, {self.description}, {self.price}, {self.quantity}'
 
 
 
