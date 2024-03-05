@@ -11,13 +11,21 @@ class Category:
         self.name = name
         self.description = description
         self.__goods = [] #Список товаров сделали приватным
-
         Category.count_category += 1 #при создании экземлпяра, счетчик увеличивается на 1
 
 
-    def list_goods(self, good):
+    def add_goods(self, good):
         ''' Метод добавления товаров в список'''
         self.__goods.append(good)
+
+    @property
+    def display(self):
+        '''Данный метод позволяет принтом вывести список товаров'''
+        return self.__goods
+
+    @property
+    def counting_goods(self):
+        return len(self.__goods)
 
 
     def __repr__(self):
@@ -58,9 +66,8 @@ class Product:
 
     @classmethod
     def launch_product(cls, new_product):
-        '''Метод по добавлению новых товаров'''
-        name, price, description, quantity = new_product.split(',')
-        return cls(name, price, description, quantity)
+        '''Класс-метод по добавлению новых товаров'''
+        return cls(**new_product)
 
 
     @property
@@ -78,19 +85,49 @@ class Product:
             self.__price = new_price
 
 
+def printing():
+    '''Метод проверки корректности методов классов'''
 
-ct1 = Category('Phones', 'mobile')
-pr2 = Product('Samsung', 'smth', 90_000, 2)
-ct1.list_goods(pr2) #Проверка по заданию 2
-print(ct1.get_format) #Проверка по заданию 2
+    # Экземпляр класса Category
+    ct1 = Category('Phones', 'mobile')
 
-pr1 = Product('iPhone', 'smth', 100_000, 3)
-pr3 = 'Nokia, smth, 1000, 10' #Проверка по заданию 3
-new_pr3 = Product.launch_product(pr3) #Проверка по заданию 3
-print(new_pr3) #Проверка по заданию 3
+    # Экземпляр класса Product
+    pr2 = Product('Samsung', 'smth', 90_000, 2)
 
-pr1.price = 0 #Проверка по заданию 4
-print(pr1.price) #Проверка по заданию 4
+    # Проверка по заданию 1. Добавление продекта в приватный список товаров
+    ct1.add_goods(pr2)
 
+    # Проверка по заданию 1. Отобращение приватного списка товаров
+    print(ct1.display)
 
+    # Проверка по заданию 1. Количество уникальных товаров в приватном списке
+    print(ct1.counting_goods)
+
+    # Проверка по заданию 2. Получение перечня товаров определнным форматом
+    print(ct1.get_format)
+
+    # Экземпляр класса Product
+    pr1 = Product('iPhone', 'smth', 100_000, 3)
+
+    #Создание словаря для дальнейшего добавления в экземпляры класса
+    pr3 = {
+        'name': 'Nokia',
+        'description': 'smth',
+        'price': 1000,
+        'quantity': 10
+    }
+
+    new_pr3 = Product.launch_product(pr3) #Проверка по заданию 3
+
+    # Проверка по заданию 3. Вывод добавленного словаря
+    print(new_pr3)
+
+    # Проверка на корректность ценыпо заданию 4. Переопределение цены первого экземпляра.
+    pr1.price = 0
+
+    # Проверка по заданию 4. Вывод первоначальной цены экземпляра
+    print(pr1.price)
+
+if __name__ == '__main__':
+    printing()
 
