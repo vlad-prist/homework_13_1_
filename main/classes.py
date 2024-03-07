@@ -2,8 +2,8 @@ class Category:
     name: str
     description: str
     goods: list
-
-    count_category = 0 #Счетчик количества категорий
+    count_category = 0 #Счетчик общего количества категорий
+    unique_product = 0 #Общее количество уникальных продуктов
 
     def __init__(self, name, description):
         '''Инициализация по заданию. Атрибуты экземпляра: название, описание.
@@ -12,6 +12,7 @@ class Category:
         self.description = description
         self.__goods = [] #Список товаров сделали приватным
         Category.count_category += 1 #при создании экземлпяра, счетчик увеличивается на 1
+        Category.unique_product += len(self.__goods)
 
 
     def add_goods(self, good):
@@ -47,7 +48,7 @@ class Product:
     description: str
     price: float
     quantity: int
-    count_product = 0 #Счетчик количества продуктов (экземпляров, не остатка)
+    #count_product = 0 #Счетчик количества продуктов (экземпляров, не остатка)
 
 
     def __init__(self, name, description, price, quantity):
