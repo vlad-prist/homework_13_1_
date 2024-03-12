@@ -15,11 +15,14 @@ class Category:
 
     def append_goods(self, good):
         '''
-         Метод добавления товаров в список
+         Метод добавления товаров в список. Если товар не относится к наследникам, то выводится ошибка
         также данный метод считает итоговое количество всех продуктов в сумме
         '''
-        self.__goods.append(good)
         Category.unique_product += good.quantity
+
+        if not issubclass(good.__class__, (SmartPhones, LawnGrass)):
+            raise TypeError('Продукт не соответсвует классу')
+        self.__goods.append(good)
 
     @property
     def display(self):
@@ -97,19 +100,57 @@ class Product:
         return (self.price * self.quantity) + (other.price * other.quantity)
 
 
+class SmartPhones(Product):
+    capacity: float #производтельность (измеряется в герцах)
+    model: str
+    memory: int
+    color: str
+
+    def __init__(self, name, description, price, quantity, capacity, model, memory, color):
+        super().__init__(name, description, price, quantity)
+        self.capacity = capacity
+        self.model = model
+        self.memory = memory
+        self.color = color
+
+    def __str__(self):
+        ''' Строковое представление экз.класса SmartPhones'''
+        return f'Бренд: {self.name}, модель: {self.model}.\nОбъем памяти: {self.memory} ГБ. Цвет: {self.color}'
+
+    def __add__(self, other):
+        ''' Суммирование объектов только одного класса, в случае, если объект иного класса - вывод ошибки '''
+        if isinstance(other, SmartPhones): #(other, type(self)) можно еще так записать
+            return (self.price * self.quantity) + (other.price * other.quantity)
+        raise ValueError("Товары из разных классов продуктов")
+
+class LawnGrass(Product):
+    country: str #страна-производитель
+    period: int #срок прорастания
+    color: str
+
+    def __init__(self, name, description, price, quantity, country, period, color):
+        super().__init__(name, description, price, quantity)
+        self.country = country
+        self.period = period
+        self.color = color
+
+    def __str__(self):
+        ''' Строковое представление экз.класса LawnGrass'''
+        return (f'{self.name},'
+                f' страна-производитель: {self.country}.\nCрок прорастания: {self.period} дней. Цвет: {self.color}')
+
+    def __add__(self, other):
+        ''' Суммирование объектов только одного класса, в случае, если объект иного класса - вывод ошибки '''
+        if not isinstance(other, LawnGrass):
+            raise ValueError("Товары из разных классов продуктов")
+        return (self.price * self.quantity) + (other.price * other.quantity)
+
+
+
 def printing():
     '''Метод проверки корректности методов классов'''
 
     category_1 = Category('Телефоны', 'мобильные телефоны') #Экземпляр класса Category
-    product_1 = Product('Samsung', 'smth', 90_000, 2)
-    product_2 = Product('iPhone', 'smth', 100_000, 3) #Экземпляр класса Product
-    category_1.append_goods(product_1) #Добавление продукта в приватный список товаров
-    category_1.append_goods(product_2)
-    #print(ct1.display) #Отображение приватного списка товаров
-    print(f'Уникальных продуктов: {category_1.unique_product}') #Количество уникальных товаров в приватном списке
-    print(f'Вывод длины: {len(category_1)}')
-    print(category_1.get_format) #Получение перечня товаров определнным форматом
-    print(str(category_1)) #Отображение строкового представления
 
    #Создание словаря для дальнейшего добавления в экземпляры класса
     new_product_3 = {
@@ -118,16 +159,25 @@ def printing():
         'price': 1000,
         'quantity': 10
     }
-
     product_3 = Product.launch_product(new_product_3) #Добавление нового продукта
-    print(product_3) #Вывод добавленного словаря
-    #pr1.price = 0 #Переопределение цены первого экземпляра.
-    #print(pr1.price) #Вывод первоначальной цены экземпляра
-    print(product_1)
-    print(product_2)
-    print(f'Метод add для 2х экземпляров класса Product: {product_1 + product_2}')
 
+    phone_1 = SmartPhones('LG', 'smartphone', 20732, 3, 1120.00, 'V50',
+                       512,'Black')
+    phone_2 = SmartPhones('Motorola', 'Раскладушка', 2823.50, 3, 516, 'V3',
+                       8, 'Black')
+    print(phone_1) #строковое отображение экз.класса SmartPhone
+    print(f'Общая сумма категории "Смартфон": {phone_1+phone_2}')
 
+    grass_1 = LawnGrass('Премиум-газон', 'Премиум', 1000, 3, 'Россия',
+                     13, 'green')
+
+    grass_2 = LawnGrass('Газон дачный', 'Эконом', 200, 10, 'Россия',
+                     10, 'light-green')
+
+    print(grass_1) #строковое отображение экз.класса LawnGrass
+    print(f'Общая сумма категории "Трава газонна": {grass_1 + grass_2}')
+    category_1.append_goods(phone_2) #Проверка, что обновленный метод append_goods работает корректно
+    print(category_1.get_format) #Вывод на печать категории, с добавленным новым продуктом
 
 if __name__ == '__main__':
     printing()
