@@ -1,3 +1,17 @@
+from abc import ABC, abstractmethod
+
+class BaseProduct(ABC):
+    ''' Абстрактный базовый класс, для выделения общего функционала  между классами '''
+
+    @abstractmethod
+    def __init__(self):
+        pass
+
+    @abstractmethod
+    def __str__(self):
+        pass
+
+
 class Category:
     name: str
     description: str
@@ -53,14 +67,21 @@ class Category:
         return f'Название категории: {self.name}, количество продуктов: {Category.unique_product} шт.'
 
 
-class Product:
-    name: str
-    description: str
-    price: float
-    quantity: int
+class MixinRepr:
+    ''' Миксин, который можно добавить к каждому классу для вывода информации в консоль о том, что был создан объект.'''
 
-    def __init__(self, name, description, price, quantity):
+    def __init__(self, *args, **kwargs):
+        print(repr(self))
+
+    def __repr__(self):
+        return f"{self.__class__.__name__} ({self.__dict__.items()})"
+
+
+class Product(BaseProduct, MixinRepr):
+
+    def __init__(self, name: str, description: str, price: float, quantity: int):
         '''Инициализация по заданию. Атрибуты экземпляра: наименование, описание, цена, остаток'''
+        super().__init__()
         self.name = name
         self.description = description
         self.__price = price
@@ -85,22 +106,18 @@ class Product:
             self.__price = new_price
 
     def __repr__(self):
-        return f'{self.name}, {self.description}, {self.__price}, {self.quantity}'
+        super().__repr__()
 
     def __str__(self):
-        '''Добавлено строковое отображение'''
+        '''Строковое отображение'''
         return f'Название продукта: {self.name}, {self.__price} руб. Остаток: {self.quantity} шт.'
 
     def __add__(self, other):
         ''' Метод сложения объектов (сложением сумм, умноженных на количество на складе).'''
-        # return Product(name='',
-        #                description='',
-        #                price=self.price+other.price,
-        #                quantity=self.quantity+other.quantity)
         return (self.price * self.quantity) + (other.price * other.quantity)
 
 
-class SmartPhones(Product):
+class SmartPhones(Product, MixinRepr):
     capacity: float #производтельность (измеряется в герцах)
     model: str
     memory: int
@@ -113,17 +130,17 @@ class SmartPhones(Product):
         self.memory = memory
         self.color = color
 
-    def __str__(self):
-        ''' Строковое представление экз.класса SmartPhones'''
-        return f'Бренд: {self.name}, модель: {self.model}.\nОбъем памяти: {self.memory} ГБ. Цвет: {self.color}'
-
     def __add__(self, other):
         ''' Суммирование объектов только одного класса, в случае, если объект иного класса - вывод ошибки '''
         if isinstance(other, SmartPhones): #(other, type(self)) можно еще так записать
             return (self.price * self.quantity) + (other.price * other.quantity)
         raise ValueError("Товары из разных классов продуктов")
+    
+    def __repr__(self):
+        super().__repr__()
 
-class LawnGrass(Product):
+
+class LawnGrass(Product, MixinRepr):
     country: str #страна-производитель
     period: int #срок прорастания
     color: str
@@ -134,17 +151,14 @@ class LawnGrass(Product):
         self.period = period
         self.color = color
 
-    def __str__(self):
-        ''' Строковое представление экз.класса LawnGrass'''
-        return (f'{self.name},'
-                f' страна-производитель: {self.country}.\nCрок прорастания: {self.period} дней. Цвет: {self.color}')
-
     def __add__(self, other):
         ''' Суммирование объектов только одного класса, в случае, если объект иного класса - вывод ошибки '''
         if not isinstance(other, LawnGrass):
             raise ValueError("Товары из разных классов продуктов")
         return (self.price * self.quantity) + (other.price * other.quantity)
 
+    def __repr__(self):
+        super().__repr__()
 
 
 def printing():
@@ -152,32 +166,21 @@ def printing():
 
     category_1 = Category('Телефоны', 'мобильные телефоны') #Экземпляр класса Category
 
-   #Создание словаря для дальнейшего добавления в экземпляры класса
-    new_product_3 = {
-        'name': 'Nokia',
-        'description': 'smth',
-        'price': 1000,
-        'quantity': 10
-    }
-    product_3 = Product.launch_product(new_product_3) #Добавление нового продукта
-
     phone_1 = SmartPhones('LG', 'smartphone', 20732, 3, 1120.00, 'V50',
                        512,'Black')
     phone_2 = SmartPhones('Motorola', 'Раскладушка', 2823.50, 3, 516, 'V3',
                        8, 'Black')
-    print(phone_1) #строковое отображение экз.класса SmartPhone
     print(f'Общая сумма категории "Смартфон": {phone_1+phone_2}')
 
     grass_1 = LawnGrass('Премиум-газон', 'Премиум', 1000, 3, 'Россия',
                      13, 'green')
-
     grass_2 = LawnGrass('Газон дачный', 'Эконом', 200, 10, 'Россия',
                      10, 'light-green')
-
-    print(grass_1) #строковое отображение экз.класса LawnGrass
     print(f'Общая сумма категории "Трава газонна": {grass_1 + grass_2}')
+
     category_1.append_goods(phone_2) #Проверка, что обновленный метод append_goods работает корректно
-    print(category_1.get_format) #Вывод на печать категории, с добавленным новым продуктом
+
+    print(grass_1) #Вывод на печать категории, с добавленным новым продуктом
 
 if __name__ == '__main__':
     printing()
