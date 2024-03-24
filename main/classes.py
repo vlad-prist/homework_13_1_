@@ -24,18 +24,22 @@ class Category:
         Товары передаются списком через метод добавления.'''
         self.name = name
         self.description = description
-        self.__goods = [] #Список товаров сделали приватным
+        self.__goods = []
         Category.count_category += 1 #при создании экземлпяра, счетчик увеличивается на 1
 
     def append_goods(self, good):
         '''
-         Метод добавления товаров в список. Если товар не относится к наследникам, то выводится ошибка
-        также данный метод считает итоговое количество всех продуктов в сумме
+        Метод добавления товаров в список с условиями:
+        1. Также данный метод считает итоговое количество всех продуктов.
+        2. Если товар не относится к наследникам, то выводится ошибка.
+        3. Если количество товара равно нулю, то выводится ошибка.
         '''
         Category.unique_product += good.quantity
 
         if not issubclass(good.__class__, (SmartPhones, LawnGrass)):
             raise TypeError('Продукт не соответсвует классу')
+        elif good.quantity == 0:
+            raise ZeroQuantity('Товар с нулевым количеством не может быть добавлен')
         self.__goods.append(good)
 
     @property
@@ -66,18 +70,39 @@ class Category:
         '''Добавлено строковое отображение'''
         return f'Название категории: {self.name}, количество продуктов: {Category.unique_product} шт.'
 
+    def average_sum(self):
+        ''' Метод, который подсчитывает средний ценник всех товаров.
+        Если в Категории не передан ни один товар, возвращает 0 '''
+        try:
+            total_sum = 0
+            for good in self.__goods:
+                total_sum += good.price
+            average_sum = total_sum / len(self.__goods)
+            return average_sum
+        except ZeroDivisionError:
+            return 0
+
+
+class ZeroQuantity(Exception):
+    ''' класс исключения, который отвечает за обработку событий,
+    когда в «Категорию» добавляется товар с нулевым количеством '''
+    def __init__(self, message="Ошибка количества"):
+        self.message = message
+        super().__init__(message)
+
 
 class MixinRepr:
     ''' Миксин, который можно добавить к каждому классу для вывода информации в консоль о том, что был создан объект.'''
 
     def __init__(self, *args, **kwargs):
-        print(repr(self))
+        # print(repr(self))
+        pass
 
     def __repr__(self):
-        return f"{self.__class__.__name__} ({self.__dict__.items()})"
+        return f"{self.__class__.__name__} {self.__dict__.items()}"
 
 
-class Product(BaseProduct, MixinRepr):
+class Product(MixinRepr, BaseProduct):
 
     def __init__(self, name: str, description: str, price: float, quantity: int):
         '''Инициализация по заданию. Атрибуты экземпляра: наименование, описание, цена, остаток'''
@@ -164,23 +189,30 @@ class LawnGrass(Product, MixinRepr):
 def printing():
     '''Метод проверки корректности методов классов'''
 
-    category_1 = Category('Телефоны', 'мобильные телефоны') #Экземпляр класса Category
+    category_1 = Category('Телефоны', 'мобильные телефоны')
 
-    phone_1 = SmartPhones('LG', 'smartphone', 20732, 3, 1120.00, 'V50',
+    phone_1 = SmartPhones('LG', 'smartphone', 20732, 1, 1120.00, 'V50',
                        512,'Black')
-    phone_2 = SmartPhones('Motorola', 'Раскладушка', 2823.50, 3, 516, 'V3',
+    phone_2 = SmartPhones('Motorola', 'Раскладушка', 2823.50, 1, 516, 'V3',
                        8, 'Black')
-    print(f'Общая сумма категории "Смартфон": {phone_1+phone_2}')
 
-    grass_1 = LawnGrass('Премиум-газон', 'Премиум', 1000, 3, 'Россия',
+    category_1.append_goods(phone_1)
+    category_1.append_goods(phone_2)
+    # print(category_1.average_sum())
+    # print(category_1.__len__())
+
+    try:
+        category_2 = Category('Газонная трава', 'трава для сада')
+        grass_1 = LawnGrass('Премиум-газон', 'Премиум', 1000, 0, 'Россия',
                      13, 'green')
-    grass_2 = LawnGrass('Газон дачный', 'Эконом', 200, 10, 'Россия',
-                     10, 'light-green')
-    print(f'Общая сумма категории "Трава газонна": {grass_1 + grass_2}')
+        category_2.append_goods(grass_1)
+    except ZeroQuantity:
+        print("Добавляется товар с нулевым количеством")
+    else:
+        print("Товар добавлен")
+    finally:
+        print("Обработка добавления товара завершена")
 
-    category_1.append_goods(phone_2) #Проверка, что обновленный метод append_goods работает корректно
-
-    print(grass_1) #Вывод на печать категории, с добавленным новым продуктом
 
 if __name__ == '__main__':
     printing()
